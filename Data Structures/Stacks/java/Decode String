@@ -1,0 +1,70 @@
+import java.util.*;
+public class Solution 
+{
+    public static String decodeString(String s) 
+	{
+      Stack<Integer> indexes= new Stack<>();
+      Stack<Integer>numberOfTimes= new Stack<>();
+      Stack<String>nestedStrings= new Stack<>();
+      String nestedsubstr="";
+      String substring="";
+      String encoded ="";
+      int startOfNum=-1;
+      for(int i=0;i<s.length();i++){
+       char ch= s.charAt(i);
+       if(Character.isDigit(ch)){
+        if(i==0 || !Character.isDigit(s.charAt(i-1)))startOfNum=i;
+        if(!indexes.isEmpty() && !substring.equals("")){
+         nestedsubstr=substring;
+         substring="";
+        }
+       }else if(ch=='['){
+         int number=Integer.parseInt(s.substring(startOfNum,i));
+         numberOfTimes.push(number);
+         nestedStrings.push(nestedsubstr); 
+         nestedsubstr="";
+         indexes.push(i);
+        }else if(ch==']'){
+          int index= indexes.pop();
+          int numOfTimes= numberOfTimes.pop();
+          String nestedString= nestedStrings.pop();
+          if(indexes.isEmpty()){
+           String plaintext="";
+           if(nestedsubstr.equals("")){
+            plaintext= s.substring(index+1,i);
+            substring="";
+           }else{
+             plaintext=nestedsubstr;
+             nestedsubstr="";
+            }
+            
+            String ciphertext="";
+            for(int k=0;k<numOfTimes;k++)ciphertext+=plaintext;
+            encoded+=ciphertext;
+          }else{
+            if(!substring.equals("")){
+             for(int k=0;k<numOfTimes;k++)nestedsubstr+=substring;
+             nestedsubstr=nestedString+nestedsubstr;
+             substring="";
+            }else {
+              for(int k=0;k<numOfTimes;k++)
+               nestedString+=nestedsubstr;
+              nestedsubstr=nestedString;
+            }
+          }  
+        }else{
+          if(indexes.isEmpty())encoded+=ch;
+         else{
+          char previousch=s.charAt(i-1);
+          if(previousch=='[')substring=""+ch;
+          else if(previousch==']')nestedsubstr+=ch;
+         else{
+          if(!substring.equals(""))substring+=ch;
+          else nestedsubstr+=ch;
+         }
+         }
+        }
+        }
+        return encoded;
+    }
+}
